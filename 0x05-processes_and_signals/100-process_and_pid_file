@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Creates a file in /var/run/myscript.pid containing its PID.
+# Utilizes traps to handle signals gracefully.
+
+# Store the current process ID in the designated file
+echo "$$" > /var/run/myscript.pid
+
+termfunc() {
+  rm /var/run/myscript.pid
+  exit
+}
+
+
+while true
+do
+  echo "To infinity and beyond"
+  sleep 2
+  trap 'echo "Y U no love me?!"' SIGINT
+  trap 'echo "I hate the kill command" && termfunc' SIGTERM
+  trap 'termfunc' SIGQUIT
+done
