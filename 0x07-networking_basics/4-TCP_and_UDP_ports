@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Prints listening active ports using ss command
+ss -l
