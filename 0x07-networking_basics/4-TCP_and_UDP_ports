@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-# Prints listening active ports using ss command
-ss -l
+# Prints listening active ports
+# Shows the PID and name of the program to which each socket belongs
+netstat -l
