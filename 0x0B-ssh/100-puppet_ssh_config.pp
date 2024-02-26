@@ -1,4 +1,6 @@
 # Define SSH client configuration
+
+include stdlib
 class ssh_config {
     # Set SSH client to use private key ~/.ssh/school
     file_line { 'Declare identity file':
