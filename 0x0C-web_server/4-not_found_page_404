@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Configures a new Ubuntu machine with Nginx and custom 404 page.
+
+set -e
+
+echo "Updating package index and installing Nginx..."
+sudo apt-get update -y -qq
+sudo apt-get install nginx -y
+
+echo "Starting Nginx service..."
+sudo service nginx start
+
+# Check if Nginx service started successfully
+if ! sudo service nginx status >/dev/null; then
+    echo "Failed to start Nginx service. Exiting..."
+    exit 1
+fi
+
+echo "Allowing Nginx HTTP traffic in the firewall..."
+sudo ufw allow 'Nginx HTTP'
+
+echo "Setting ownership and permissions for /var/www/html..."
+sudo chown "$USER":"$USER" /var/www/html
+sudo chmod 755 /var/www/html
+
+# Backup default index file
+if [[ ! -f /var/www/html/index.nginx-debian.html.bckp ]]; then
+    cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+fi
+
+echo "Creating a new index file with 'Hello World!' content..."
+echo "Hello World!" | sudo tee /var/www/html/index.nginx-debian.html >/dev/null
+
+echo "Configuring custom 404 page..."
+sudo tee -a /etc/nginx/sites-available/custom_404 <<EOF
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    server_name _;
+
+    error_page 404 /404.html;
+    location = /404.html {
+        internal;
+        return 200 "Ceci n'est pas une page\n";
+    }
+}
+EOF
+
+# Enable the custom 404 server block
+sudo ln -s /etc/nginx/sites-available/custom_404 /etc/nginx/sites-enabled/
+
+echo "Restarting Nginx service to apply changes..."
+sudo service nginx restart
+
+echo "Configuration completed successfully."

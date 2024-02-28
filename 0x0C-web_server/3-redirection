@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# Installs Nginx on a new Ubuntu machine, configures it to listen on port 80,
+# and serves a "Hello World!" page. Additionally, sets up a redirect for
+# /redirect_me to a YouTube video.
+
+set -e
+
+echo "Updating package index and installing Nginx..."
+sudo apt-get update -y -qq
+sudo apt-get install nginx -y
+
+echo "Starting Nginx service..."
+sudo service nginx start
+
+# Check if Nginx service started successfully
+if ! sudo service nginx status >/dev/null; then
+    echo "Failed to start Nginx service. Exiting..."
+    exit 1
+fi
+
+echo "Allowing Nginx HTTP traffic in the firewall..."
+sudo ufw allow 'Nginx HTTP'
+
+echo "Setting ownership and permissions for /var/www/html..."
+sudo chown "$USER":"$USER" /var/www/html
+sudo chmod 755 /var/www/html
+
+# Backup default index file
+if [[ ! -f /var/www/html/index.nginx-debian.html.bckp ]]; then
+    cp /var/www/html/index.nginx-debian.html /var/www/html/index.nginx-debian.html.bckp
+fi
+
+echo "Creating a new index file with 'Hello World!' content..."
+echo "Hello World!" | sudo tee /var/www/html/index.nginx-debian.html >/dev/null
+
+echo "Configuring redirect for /redirect_me to a YouTube video..."
+sudo tee -a /etc/nginx/sites-available/redirect_me <<EOF
+server {
+    listen 80;
+    server_name _;
+    location /redirect_me {
+        return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+    }
+}
+EOF
+
+# Enable the redirect server block
+sudo ln -s /etc/nginx/sites-available/redirect_me /etc/nginx/sites-enabled/
+
+echo "Restarting Nginx service to apply changes..."
+sudo service nginx restart
+
+echo "Configuration completed successfully."
