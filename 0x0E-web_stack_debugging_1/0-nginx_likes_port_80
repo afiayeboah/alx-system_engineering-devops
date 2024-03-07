@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Step 1: Install Nginx
+sudo apt-get update
+sudo apt-get install nginx -y
+
+# Step 2: Check Nginx configuration
+if ! grep -q "listen 80;" /etc/nginx/sites-available/default; then
+    sudo sed -i 's/listen [::]:80 default_server;/listen 80 default_server;/' /etc/nginx/sites-available/default
+fi
+
+# Step 3: Check for conflicting processes on port 80
+conflicting_process=$(sudo netstat -tuln | grep ":80 ")
+if [ -n "$conflicting_process" ]; then
+    echo "Found a conflicting process on port 80:"
+    echo "$conflicting_process"
+
+fi
+
+# Step 4: Ensure port 80 is open in the firewall
+sudo ufw allow 80
+
+# Restart Nginx to apply changes
+sudo systemctl restart nginx
+
+echo "Nginx is now listening on port 80."
+
