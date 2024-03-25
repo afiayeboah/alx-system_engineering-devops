@@ -5,18 +5,6 @@ import requests
 import sys
 
 
-def export_to_json(user_id, username, todos):
-    data = {"USER_ID": []}
-    for todo in todos:
-        data["USER_ID"].append({
-            "task": todo["title"],
-            "completed": todo["completed"],
-            "username": username
-        })
-    with open(f"{user_id}.json", "w") as json_file:
-        json.dump(data, json_file, indent=4)
-
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python script.py <employee_id>")
@@ -28,5 +16,10 @@ if __name__ == "__main__":
     username = user.get("username")
     todos = requests.get(f"{url}todos", params={"userId": user_id}).json()
 
-    export_to_json(user_id, username, todos)
-    print(f"Data exported to {user_id}.json")
+
+    with open("{}.json".format(user_id), "w") as jsonfile:
+        json.dump({user_id: [{
+                "task": t.get("title"),
+                "completed": t.get("completed"),
+                "username": username
+            } for t in todos]}, jsonfile)
