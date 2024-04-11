@@ -11,15 +11,12 @@ def top_ten(subreddit):
     '''
         Retrieve the top ten posts for a specified subreddit.
     '''
-    user = {'User-Agent': 'Lizzie'}
-    url = requests.get('https://www.reddit.com/r/{}/hot/.json?limit=10'
-                       .format(subreddit), headers=user).json()
-    try:
-        for post in url.get('data').get('children'):
-            print(post.get('data').get('title'))
-    except Exception:
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    headers = {'User-Agent': 'Safari/537.36'}
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        data = response.json()
+        for i in range(10):
+            print(data['data']['children'][i]['data']['title'])
+    else:
         print(None)
-
-
-if __name__ == "__main__":
-    top_ten(argv[1])

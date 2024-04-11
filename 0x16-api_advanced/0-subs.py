@@ -12,24 +12,14 @@ def number_of_subscribers(subreddit):
     '''
         Retrieve the number of subscribers for a specified subreddit.
     '''
-    user_agent = {'User-Agent': 'Lizzie'}
-
-    url = 'https://www.reddit.com/r/{}/about.json'.format(subreddit)
-
-    response = requests.get(url, headers=user_agent)
-
-    if response.status_code == 200:
-
-        data = response.json()
-
-        subscribers = data.get('data', {}).get('subscribers', 0)
-        return subscribers
-    else:
-
+    user = {'User-Agent': 'Lizzie'}
+    url = requests.get('https://www.reddit.com/r/{}/about.json'
+                       .format(subreddit), headers=user).json()
+    try:
+        return url.get('data').get('subscribers')
+    except Exception:
         return 0
 
 
 if __name__ == "__main__":
-    subreddit_name = argv[1]
-
-    print(number_of_subscribers(subreddit_name))
+    number_of_subscribers(argv[1])
