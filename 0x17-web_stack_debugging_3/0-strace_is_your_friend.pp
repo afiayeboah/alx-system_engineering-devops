@@ -2,10 +2,9 @@
 
 $file_to_edit = '/var/www/html/wp-settings.php'
 
-file_line { 'replace_phpp_with_php':
-  path    => $file_to_edit,
-  line    => 'php',
-  match   => 'phpp',
-  ensure  => present,
-  replace => true,
+#replace line containing "phpp" with "php"
+
+exec { 'replace_line':
+  command => "sed -i 's/phpp/php/g' ${file_to_edit}",
+  path    => ['/bin','/usr/bin']
 }
